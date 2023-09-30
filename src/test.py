@@ -75,20 +75,27 @@ async def do_read(dut, addr, length):
 async def test_spi(dut):
     await do_start(dut)
     await do_write(dut, 1, [1, 2, 3, 4])
-    recv = await do_read(dut, 1, 4)
+    recv = await do_read(dut, 257, 4)
     assert recv == [1, 2, 3, 4]
 
     await do_write(dut, 0, [1, 0xff, 0xaa, 4, 0x80, 0x08, 0xa5, 0x5a])
-    recv = await do_read(dut, 0, 8)
+    recv = await do_read(dut, 256, 8)
     assert recv == [1, 0xff, 0xaa, 4, 0x80, 0x08, 0xa5, 0x5a]
 
+    mem = recv
     for i in range(100):
         length = random.randint(1,8)
         data = [random.randint(0,255) for _ in range(length)]
         addr = random.randint(0, 8-length)
-        await do_write(dut, addr, data)
-        recv = await do_read(dut, addr, length)
+        await do_write(dut, 256+addr, data)
+        recv = await do_read(dut, 256+addr, length)
         assert recv == data
+
+        for k in range(length):
+            mem[addr + k] = data[k]
+        recv = await do_read(dut, 256, 8)
+        assert recv == mem
+
 
 @cocotb.test()
 async def test_debug(dut):
@@ -113,3 +120,28 @@ async def test_debug(dut):
             nibble = (data[i >> 1] >> (4 * (i & 1))) & 0xF
             assert dut.debug_data.value == nibble
             assert dut.segments.value == segments[nibble]
+
+@cocotb.test()
+async def test_rom(dut):
+    await do_start(dut)
+    data = await do_read(dut, 0, 256)
+
+    expected_words = [0x4a084b07, 0x2104601a, 0x4b0762d1, 0x60182001, 0x18400341, 0xd1012801, 0x18404249, 0xe7f860d8, 0x4000f000, 0x400140a0, 0x40050050]
+    expected_data = []
+    for word in expected_words:
+        expected_data.append(word & 0xff)
+        expected_data.append((word >> 8) & 0xff)
+        expected_data.append((word >> 16) & 0xff)
+        expected_data.append((word >> 24) & 0xff)
+    expected_data.extend([0 for _ in range(208)])
+    expected_data.append(0x5a)
+    expected_data.append(0xa2)
+    expected_data.append(0x46)
+    expected_data.append(0x16)
+
+    assert len(expected_data) == 256
+    assert expected_data[43] == 0x40
+    assert expected_data[255] == 0x16
+
+    for i in range(256):
+        assert data[i] == expected_data[i]

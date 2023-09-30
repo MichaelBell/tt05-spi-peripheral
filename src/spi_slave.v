@@ -28,8 +28,14 @@ module spi_slave #( parameter RAM_LEN_BITS = 3 ) (
         end
     end
 
+    wire [31:0] rp2040_rom_word = rp2040_rom(cmd[10:5]);
+
     always @(negedge spi_clk) begin
-        data_out <= data[cmd[RAM_LEN_BITS-1+3:3]][7 - cmd[2:0]];
+        if (cmd[11]) begin
+            data_out <= data[cmd[RAM_LEN_BITS-1+3:3]][7 - cmd[2:0]];
+        end else begin
+            data_out <= rp2040_rom_word[{cmd[4:3], 3'h7 - cmd[2:0]}];
+        end
     end
     assign spi_miso = reading ? data_out : 0;
 
@@ -49,6 +55,7 @@ module spi_slave #( parameter RAM_LEN_BITS = 3 ) (
             if (!reading && !writing && !bad_cmd) begin
                 cmd <= next_cmd[30:0];
                 if (next_start_count == 32) begin
+                    cmd <= {next_cmd[27:0], 3'h0};
                     if (next_cmd[31:24] == 3)
                         reading <= 1;
                     else if (next_cmd[31:24] == 2)
@@ -65,4 +72,24 @@ module spi_slave #( parameter RAM_LEN_BITS = 3 ) (
     always @(posedge clk) begin
         byte_out <= data[addr_in];
     end
+
+    function [31:0] rp2040_rom(input [5:0] addr);
+        case(addr)
+            //                7654321
+            0:  rp2040_rom = 32'h4a084b07;
+            1:  rp2040_rom = 32'h2104601a;
+            2:  rp2040_rom = 32'h4b0762d1;
+            3:  rp2040_rom = 32'h60182001;
+            4:  rp2040_rom = 32'h18400341;
+            5:  rp2040_rom = 32'hd1012801;
+            6:  rp2040_rom = 32'h18404249;
+            7:  rp2040_rom = 32'he7f860d8;
+            8:  rp2040_rom = 32'h4000f000;
+            9:  rp2040_rom = 32'h400140a0;
+            10: rp2040_rom = 32'h40050050;
+            63: rp2040_rom = 32'h1646a25a;
+            default:    
+                rp2040_rom = 0;
+        endcase
+    endfunction
 endmodule
