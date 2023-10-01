@@ -1,8 +1,10 @@
 // Copyright (C) 2023 Michael Bell
-// SPI RAM that accepts reads and writes using
-// commands 03h and 02h.
+// SPI RAM that accepts reads and writes using commands 03h and 02h.
+// Also accepts QSPI fast reads and writes using commands 6Bh and 32h.
+// QSPI fast read has 2 delays cycles (or more, configurable by parameter).
+// QSPI reads and writes use MOSI only for command and address, D0-D3 are used for data only.
 
-module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3 ) (
+module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FAST_READ_DELAY = 2 ) (
     input spi_clk,
     input [3:0] spi_d_in,
     input spi_select,
@@ -20,6 +22,7 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3 ) (
     reg writing;
     reg bad_cmd;
     reg quad;
+    reg delay;
 
     reg [7:0] data [0:2**RAM_LEN_BITS-1];
     wire data_out;
@@ -31,7 +34,14 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3 ) (
 
     always @(posedge spi_clk) begin
         if (writing) begin
-            data[cmd[RAM_LEN_BITS-1+3:3]][7 - cmd[2:0]] <= spi_mosi;
+            if (quad) begin
+                if (cmd[2])
+                    data[cmd[RAM_LEN_BITS-1+3:3]][3:0] <= spi_d_in;
+                else
+                    data[cmd[RAM_LEN_BITS-1+3:3]][7:4] <= spi_d_in;
+            end else begin
+                data[cmd[RAM_LEN_BITS-1+3:3]][7 - cmd[2:0]] <= spi_mosi;
+            end
         end
     end
 
@@ -64,11 +74,17 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3 ) (
             bad_cmd <= 0;
             spi_d_oe <= 4'b0010;
             quad <= 0;
+            delay <= 0;
         end else begin
             start_count <= next_start_count[4:0];
 
             if (!reading && !writing && !bad_cmd) begin
                 cmd <= next_cmd[30:0];
+                if (next_start_count == 31) begin
+                    if (next_cmd[30:23] == 8'h32) begin
+                        spi_d_oe <= 4'b0000;
+                    end
+                end
                 if (next_start_count == 32) begin
                     cmd <= {next_cmd[27:0], 3'h0};
                     if (next_cmd[31:24] == 3) begin
@@ -77,14 +93,24 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3 ) (
                     end else if (next_cmd[31:24] == 2) begin
                         writing <= 1;
                         quad <= 0;
-                    end else if (next_cmd[31:24] == 8'h63) begin
+                    end else if (next_cmd[31:24] == 8'h6B) begin
                         reading <= 1;
                         quad <= 1;
-                        spi_d_oe <= 4'b1111;
+                        delay <= 1;
+                    end else if (next_cmd[31:24] == 8'h32) begin
+                        writing <= 1;
+                        quad <= 1;
                     end else begin
                         bad_cmd <= 1;
                         quad <= 0;
                     end
+                end
+            end else if (delay) begin
+                if (next_start_count == FAST_READ_DELAY - 1) begin
+                    spi_d_oe <= 4'b1111;
+                end
+                if (next_start_count == FAST_READ_DELAY) begin
+                    delay <= 0;
                 end
             end else if (reading || writing) begin
                 cmd <= cmd + (quad ? 4 : 1);
