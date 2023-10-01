@@ -10,7 +10,6 @@ async def do_start(dut):
     clock = Clock(dut.debug_clk, 77, units="ns")
     cocotb.start_soon(clock.start())
 
-    dut.spi_mosi.value = 0
     dut.spi_select.value = 1
     dut.rst_n.value = 1
     dut.clk.value = 0
@@ -21,14 +20,19 @@ async def do_start(dut):
 
     dut.rst_n.value = 1
     await Timer(20, "ns")
+    assert dut.uio_oe.value == 0b11110010
+    dut.spi_mosi.value = 0
+    await Timer(20, "ns")
 
 async def cycle_clock(dut, num=1):
-    await Timer(10, "ns")
+    await Timer(8, "ns")
     dut.clk.value = 1
-    await Timer(10, "ns")
+    await Timer(8, "ns")
     dut.clk.value = 0
+    await Timer(1, "ns")
 
 async def do_write(dut, addr, data):
+    assert dut.uio_oe.value == 0b11110010
     cmd = 2
     dut.spi_select.value = 0
     for i in range(8):
@@ -49,6 +53,7 @@ async def do_write(dut, addr, data):
     await Timer(100, "ns")
 
 async def do_read(dut, addr, length):
+    assert dut.uio_oe.value == 0b11110010
     cmd = 3
     data = []
     dut.spi_select.value = 0
@@ -63,12 +68,39 @@ async def do_read(dut, addr, length):
     for j in range(length):
         d = 0
         for i in range(8):
-            await cycle_clock(dut)
             d <<= 1
             d |= dut.spi_miso.value
+            await cycle_clock(dut)
         data.append(d)
     dut.spi_select.value = 1
     await Timer(100, "ns")
+    return data
+
+async def do_quad_read(dut, addr, length):
+    assert dut.uio_oe.value == 0b11110010
+    cmd = 0x63
+    data = []
+    dut.spi_select.value = 0
+    for i in range(8):
+        dut.spi_mosi.value = 1 if (cmd & 0x80) != 0 else 0
+        cmd <<= 1
+        await cycle_clock(dut)
+    for i in range(24):
+        dut.spi_mosi.value = 1 if (addr & 0x800000) != 0 else 0
+        addr <<= 1
+        await cycle_clock(dut)
+    assert dut.uio_oe.value == 0b11111111
+    for j in range(length):
+        d = 0
+        for i in range(2):
+            d <<= 4
+            d |= dut.spi_q_data_out.value
+            await cycle_clock(dut)
+        data.append(d)
+    dut.spi_select.value = 1
+    await Timer(10, "ns")
+    assert dut.uio_oe.value == 0b11110010
+    await Timer(90, "ns")
     return data
 
 @cocotb.test()
@@ -96,14 +128,41 @@ async def test_spi(dut):
         recv = await do_read(dut, 256, 8)
         assert recv == mem
 
+@cocotb.test()
+async def test_quad_spi(dut):
+    await do_start(dut)
+    await do_write(dut, 1, [1, 2, 3, 4])
+    recv = await do_quad_read(dut, 257, 4)
+    assert recv == [1, 2, 3, 4]
+
+    await do_write(dut, 0, [1, 0xff, 0xaa, 4, 0x80, 0x08, 0xa5, 0x5a])
+    recv = await do_quad_read(dut, 256, 8)
+    assert recv == [1, 0xff, 0xaa, 4, 0x80, 0x08, 0xa5, 0x5a]
+
+    mem = recv
+    for i in range(100):
+        length = random.randint(1,8)
+        data = [random.randint(0,255) for _ in range(length)]
+        addr = random.randint(0, 8-length)
+        await do_write(dut, 256+addr, data)
+        recv = await do_quad_read(dut, 256+addr, length)
+        assert recv == data
+
+        for k in range(length):
+            mem[addr + k] = data[k]
+        recv = await do_quad_read(dut, 256, 8)
+        assert recv == mem
+
 
 @cocotb.test()
 async def test_debug(dut):
     await do_start(dut)
     await do_write(dut, 0, [1, 2, 3, 4, 5, 6, 7, 8])
 
+    DEBUG_BYTES = 8
+
     await FallingEdge(dut.debug_clk)
-    for i in range(8):
+    for i in range(DEBUG_BYTES):
         dut.debug_addr.value = i*2
         await ClockCycles(dut.debug_clk, 1, False)
         assert dut.debug_data.value == i + 1
@@ -114,7 +173,7 @@ async def test_debug(dut):
         await do_write(dut, 0, data)
 
         await FallingEdge(dut.debug_clk)
-        for i in range(16):
+        for i in range(DEBUG_BYTES*2):
             dut.debug_addr.value = i
             await ClockCycles(dut.debug_clk, 1, False)
             nibble = (data[i >> 1] >> (4 * (i & 1))) & 0xF

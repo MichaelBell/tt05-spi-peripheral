@@ -34,6 +34,7 @@ module tb ();
     wire [7:0] uo_out;
     
     wire spi_miso = uio_out[1];
+    wire [3:0] spi_q_data_out = uio_out[3:0];
     wire [3:0] debug_data = uio_out[7:4];
     wire [7:0] uio_out;
 

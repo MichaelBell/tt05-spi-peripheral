@@ -16,11 +16,8 @@ module tt_um_MichaelBell_spi_slave (
     assign uo_out[7] = ui_in[1];  // SPI select debug
 
     // set bidirectionals
-    assign uio_oe = 8'b11110010;
-
-    // Tie unused outputs
-    assign uio_out[0] = 1'b0;
-    assign uio_out[3:2] = 2'd0;
+    wire [3:0] spi_d_oe;
+    assign uio_oe = {4'b1111, spi_d_oe};
 
     wire [7:0] debug_byte;
     wire [3:0] debug_nibble;
@@ -28,10 +25,11 @@ module tt_um_MichaelBell_spi_slave (
     // SPI slave
     spi_slave i_spi(
             .spi_clk(clk), 
-            .spi_mosi(uio_in[0]), 
+            .spi_d_in(uio_in[3:0]), 
             .spi_select(ui_in[1] && rst_n), 
-            .spi_miso(uio_out[1]), 
-            .clk(ui_in[0]), 
+            .spi_d_out(uio_out[3:0]),
+            .spi_d_oe(spi_d_oe), 
+            .debug_clk(ui_in[0]), 
             .addr_in(ui_in[5:3]), 
             .byte_out(debug_byte));
 
