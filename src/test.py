@@ -25,16 +25,17 @@ async def do_start(dut):
     await Timer(20, "ns")
 
 async def cycle_clock(dut, num=1):
-    await Timer(8, "ns")
+    await Timer(4, "ns")
     dut.clk.value = 1
     await Timer(8, "ns")
     dut.clk.value = 0
-    await Timer(1, "ns")
+    await Timer(5, "ns")
 
 async def do_write(dut, addr, data):
     assert dut.uio_oe.value == 0b11110010
     cmd = 2
     dut.spi_select.value = 0
+    await Timer(10, "ns")
     for i in range(8):
         dut.spi_mosi.value = 1 if (cmd & 0x80) != 0 else 0
         cmd <<= 1
@@ -57,6 +58,7 @@ async def do_read(dut, addr, length):
     cmd = 3
     data = []
     dut.spi_select.value = 0
+    await Timer(10, "ns")
     for i in range(8):
         dut.spi_mosi.value = 1 if (cmd & 0x80) != 0 else 0
         cmd <<= 1
@@ -81,6 +83,7 @@ async def do_quad_read(dut, addr, length):
     cmd = 0x63
     data = []
     dut.spi_select.value = 0
+    await Timer(10, "ns")
     for i in range(8):
         dut.spi_mosi.value = 1 if (cmd & 0x80) != 0 else 0
         cmd <<= 1
