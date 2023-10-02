@@ -47,12 +47,16 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FA
 
     wire [31:0] rp2040_rom_word = rp2040_rom(cmd[10:5]);
     wire [31:0] rp2040_rom_nibble = rp2040_rom_word >> {cmd[4:3], ~cmd[2], 2'b00};
+    wire [31:0] rp2040_rom2_word = rp2040_rom2(cmd[10:5]);
+    wire [31:0] rp2040_rom2_nibble = rp2040_rom2_word >> {cmd[4:3], ~cmd[2], 2'b00};
 
     wire [7:0] ram_data = data[cmd[RAM_LEN_BITS-1+3:3]];
 
     always @(negedge spi_clk) begin
         if (cmd[11]) begin
             q_data_out <= cmd[2] ? ram_data[3:0] : ram_data[7:4];
+        end else if (cmd[12]) begin
+            q_data_out <= rp2040_rom2_nibble[3:0];
         end else begin
             q_data_out <= rp2040_rom_nibble[3:0];
         end
@@ -122,23 +126,47 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FA
         byte_out <= data[addr_in];
     end
 
+    // This ROM at memory address 0 launches the RP2040 into XIP mode (currently SPI, needs tweaking to QSPI)
+    // And starts execution at 0x10000200 (address 0x200 in flash)
     function [31:0] rp2040_rom(input [5:0] addr);
         case(addr)
-            //                7654321
-            0:  rp2040_rom = 32'h4a084b07;
-            1:  rp2040_rom = 32'h2104601a;
-            2:  rp2040_rom = 32'h4b0762d1;
-            3:  rp2040_rom = 32'h60182001;
-            4:  rp2040_rom = 32'h18400341;
-            5:  rp2040_rom = 32'hd1012801;
-            6:  rp2040_rom = 32'h18404249;
-            7:  rp2040_rom = 32'he7f860d8;
-            8:  rp2040_rom = 32'h4000f000;
-            9:  rp2040_rom = 32'h400140a0;
-            10: rp2040_rom = 32'h40050050;
-            63: rp2040_rom = 32'h1646a25a;
+            0:  rp2040_rom = 32'h4b08b500;
+            1:  rp2040_rom = 32'h60992100;
+            2:  rp2040_rom = 32'h61592104;
+            3:  rp2040_rom = 32'h60194906;
+            4:  rp2040_rom = 32'h48074906;
+            5:  rp2040_rom = 32'h21006001;
+            6:  rp2040_rom = 32'h21016059;
+            7:  rp2040_rom = 32'h49056099;
+            8:  rp2040_rom = 32'h00004708;
+            9:  rp2040_rom = 32'h18000000;
+            10: rp2040_rom = 32'h001f0300;
+            11: rp2040_rom = 32'h03000218;
+            12: rp2040_rom = 32'h180000f4;
+            13: rp2040_rom = 32'h10000200;
+
+            63: rp2040_rom = 32'h04765c36;
             default:    
                 rp2040_rom = 0;
+        endcase
+    endfunction
+
+    // This ROM at memory address 0x200 is the program, it fades the LED connected to pin 25 on the RP2040.
+    function [31:0] rp2040_rom2(input [5:0] addr);
+        case(addr)
+            0:  rp2040_rom2 = 32'h4a084b07;
+            1:  rp2040_rom2 = 32'h2104601a;
+            2:  rp2040_rom2 = 32'h4b0762d1;
+            3:  rp2040_rom2 = 32'h60182001;
+            4:  rp2040_rom2 = 32'h18400341;
+            5:  rp2040_rom2 = 32'hd1012801;
+            6:  rp2040_rom2 = 32'h18404249;
+            7:  rp2040_rom2 = 32'he7f860d8;
+            8:  rp2040_rom2 = 32'h4000f000;
+            9:  rp2040_rom2 = 32'h400140a0;
+            10: rp2040_rom2 = 32'h40050050;
+            default:    
+                rp2040_rom2 = 0;
         endcase
     endfunction
 endmodule

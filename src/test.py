@@ -250,7 +250,7 @@ async def test_debug(dut):
 @cocotb.test()
 async def test_rom(dut):
     await do_start(dut)
-    data = await do_read(dut, 0, 256)
+    data = await do_read(dut, 0x200, 128)
 
     expected_words = [0x4a084b07, 0x2104601a, 0x4b0762d1, 0x60182001, 0x18400341, 0xd1012801, 0x18404249, 0xe7f860d8, 0x4000f000, 0x400140a0, 0x40050050]
     expected_data = []
@@ -259,15 +259,32 @@ async def test_rom(dut):
         expected_data.append((word >> 8) & 0xff)
         expected_data.append((word >> 16) & 0xff)
         expected_data.append((word >> 24) & 0xff)
-    expected_data.extend([0 for _ in range(208)])
-    expected_data.append(0x5a)
-    expected_data.append(0xa2)
-    expected_data.append(0x46)
-    expected_data.append(0x16)
+    expected_data.extend([0 for _ in range(128-44)])
+    assert len(expected_data) == 128
+    assert expected_data[43] == 0x40
+
+    for i in range(128):
+        assert data[i] == expected_data[i]
+
+    data = await do_read(dut, 0, 256)
+    
+    expected_words = [0x4b08b500, 0x60992100, 0x61592104, 0x60194906, 0x48074906, 0x21006001, 0x21016059, 0x49056099, 0x00004708, 0x18000000, 0x001f0300, 0x03000218, 0x180000f4, 0x10000200]
+    expected_data = []
+    for word in expected_words:
+        expected_data.append(word & 0xff)
+        expected_data.append((word >> 8) & 0xff)
+        expected_data.append((word >> 16) & 0xff)
+        expected_data.append((word >> 24) & 0xff)
+    expected_data.extend([0 for _ in range(256-56-4)])
+    expected_data.append(0x36)
+    expected_data.append(0x5c)
+    expected_data.append(0x76)
+    expected_data.append(0x04)
 
     assert len(expected_data) == 256
-    assert expected_data[43] == 0x40
-    assert expected_data[255] == 0x16
+    assert expected_data[55] == 0x10
+    assert expected_data[255] == 0x04
 
     for i in range(256):
         assert data[i] == expected_data[i]
+
