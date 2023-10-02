@@ -72,7 +72,7 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FA
             reading <= 0;
             writing <= 0;
             bad_cmd <= 0;
-            spi_d_oe <= 4'b0010;
+            spi_d_oe <= 4'b0000;
             quad <= 0;
             delay <= 0;
         end else begin
@@ -81,8 +81,8 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FA
             if (!reading && !writing && !bad_cmd) begin
                 cmd <= next_cmd[30:0];
                 if (next_start_count == 31) begin
-                    if (next_cmd[30:23] == 8'h32) begin
-                        spi_d_oe <= 4'b0000;
+                    if (next_cmd[30:23] == 8'h03) begin
+                        spi_d_oe <= 4'b0010;
                     end
                 end
                 if (next_start_count == 32) begin

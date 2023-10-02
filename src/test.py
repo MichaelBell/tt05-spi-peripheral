@@ -20,7 +20,7 @@ async def do_start(dut):
 
     dut.rst_n.value = 1
     await Timer(20, "ns")
-    assert dut.uio_oe.value == 0b11110010
+    assert dut.uio_oe.value == 0b11110000
     dut.spi_mosi.value = 0
     await Timer(20, "ns")
 
@@ -32,7 +32,7 @@ async def cycle_clock(dut, num=1):
     await Timer(5, "ns")
 
 async def do_write(dut, addr, data):
-    assert dut.uio_oe.value == 0b11110010
+    assert dut.uio_oe.value == 0b11110000
     cmd = 2
     dut.spi_select.value = 0
     await Timer(10, "ns")
@@ -46,6 +46,7 @@ async def do_write(dut, addr, data):
         await cycle_clock(dut)
     for j in range(len(data)):
         d = data[j]
+        assert dut.uio_oe.value == 0b11110000
         for i in range(8):
             dut.spi_mosi.value = 1 if (d & 0x80) != 0 else 0
             d <<= 1
@@ -54,7 +55,7 @@ async def do_write(dut, addr, data):
     await Timer(100, "ns")
 
 async def do_read(dut, addr, length):
-    assert dut.uio_oe.value == 0b11110010
+    assert dut.uio_oe.value == 0b11110000
     cmd = 3
     data = []
     dut.spi_select.value = 0
@@ -66,20 +67,27 @@ async def do_read(dut, addr, length):
     for i in range(24):
         dut.spi_mosi.value = 1 if (addr & 0x800000) != 0 else 0
         addr <<= 1
+        if (i == 23):
+            assert dut.uio_oe.value == 0b11110010
+        else:
+            assert dut.uio_oe.value == 0b11110000
         await cycle_clock(dut)
     for j in range(length):
         d = 0
+        assert dut.uio_oe.value == 0b11110010
         for i in range(8):
             d <<= 1
             d |= dut.spi_miso.value
             await cycle_clock(dut)
         data.append(d)
     dut.spi_select.value = 1
-    await Timer(100, "ns")
+    await Timer(10, "ns")
+    assert dut.uio_oe.value == 0b11110000
+    await Timer(90, "ns")
     return data
 
 async def do_quad_read(dut, addr, length):
-    assert dut.uio_oe.value == 0b11110010
+    assert dut.uio_oe.value == 0b11110000
     cmd = 0x6B
     data = []
     dut.spi_select.value = 0
@@ -92,12 +100,13 @@ async def do_quad_read(dut, addr, length):
         dut.spi_mosi.value = 1 if (addr & 0x800000) != 0 else 0
         addr <<= 1
         await cycle_clock(dut)
-    assert dut.uio_oe.value == 0b11110010
+    assert dut.uio_oe.value == 0b11110000
     await cycle_clock(dut)
     assert dut.uio_oe.value == 0b11111111
     await cycle_clock(dut)
     for j in range(length):
         d = 0
+        assert dut.uio_oe.value == 0b11111111
         for i in range(2):
             d <<= 4
             d |= dut.spi_q_data_out.value
@@ -105,12 +114,12 @@ async def do_quad_read(dut, addr, length):
         data.append(d)
     dut.spi_select.value = 1
     await Timer(10, "ns")
-    assert dut.uio_oe.value == 0b11110010
+    assert dut.uio_oe.value == 0b11110000
     await Timer(90, "ns")
     return data
 
 async def do_quad_write(dut, addr, data):
-    assert dut.uio_oe.value == 0b11110010
+    assert dut.uio_oe.value == 0b11110000
     cmd = 0x32
     dut.spi_select.value = 0
     await Timer(10, "ns")
@@ -121,13 +130,10 @@ async def do_quad_write(dut, addr, data):
     for i in range(24):
         dut.spi_mosi.value = 1 if (addr & 0x800000) != 0 else 0
         addr <<= 1
-        if (i == 23):
-            assert dut.uio_oe.value == 0b11110000
-        else:
-            assert dut.uio_oe.value == 0b11110010
         await cycle_clock(dut)
     for j in range(len(data)):
         d = data[j]
+        assert dut.uio_oe.value == 0b11110000
         for i in range(2):
             dut.spi_mosi.value = 1 if (d & 0x10) != 0 else 0
             dut.uio_in.value = (d & 0xe0) >> 5
