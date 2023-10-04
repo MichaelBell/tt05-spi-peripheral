@@ -126,45 +126,43 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FA
         byte_out <= data[addr_in];
     end
 
-    // This ROM at memory address 0 launches the RP2040 into XIP mode (currently SPI, needs tweaking to QSPI)
+    // This ROM at memory address 0 launches the RP2040 into XIP mode (QSPI)
     // And starts execution at 0x10000200 (address 0x200 in flash)
     function [31:0] rp2040_rom(input [5:0] addr);
         case(addr)
-            0:  rp2040_rom = 32'h4b08b500;
-            1:  rp2040_rom = 32'h60992100;
-            2:  rp2040_rom = 32'h61592104;
-            3:  rp2040_rom = 32'h60194906;
-            4:  rp2040_rom = 32'h48074906;
-            5:  rp2040_rom = 32'h21006001;
-            6:  rp2040_rom = 32'h21016059;
-            7:  rp2040_rom = 32'h49056099;
-            8:  rp2040_rom = 32'h00004708;
-            9:  rp2040_rom = 32'h18000000;
-            10: rp2040_rom = 32'h001f0300;
-            11: rp2040_rom = 32'h03000218;
-            12: rp2040_rom = 32'h180000f4;
-            13: rp2040_rom = 32'h10000200;
+0: rp2040_rom = 32'h21004b07;
+1: rp2040_rom = 32'h21066099;
+2: rp2040_rom = 32'h49066159;
+3: rp2040_rom = 32'h49066019;
+4: rp2040_rom = 32'h60014806;
+5: rp2040_rom = 32'h60592100;
+6: rp2040_rom = 32'h60992101;
+7: rp2040_rom = 32'h47084904;
+8: rp2040_rom = 32'h18000000;
+9: rp2040_rom = 32'h005f0300;
+10: rp2040_rom = 32'h6b001218;
+11: rp2040_rom = 32'h180000f4;
+12: rp2040_rom = 32'h10000201;
 
-            63: rp2040_rom = 32'h04765c36;
+            63: rp2040_rom = 32'hb2a3242c;
             default:    
                 rp2040_rom = 0;
         endcase
     endfunction
 
-    // This ROM at memory address 0x200 is the program, it fades the LED connected to pin 25 on the RP2040.
     function [31:0] rp2040_rom2(input [5:0] addr);
         case(addr)
-            0:  rp2040_rom2 = 32'h4a084b07;
-            1:  rp2040_rom2 = 32'h2104601a;
-            2:  rp2040_rom2 = 32'h4b0762d1;
-            3:  rp2040_rom2 = 32'h60182001;
-            4:  rp2040_rom2 = 32'h18400341;
-            5:  rp2040_rom2 = 32'hd1012801;
-            6:  rp2040_rom2 = 32'h18404249;
-            7:  rp2040_rom2 = 32'he7f860d8;
-            8:  rp2040_rom2 = 32'h4000f000;
-            9:  rp2040_rom2 = 32'h400140a0;
-            10: rp2040_rom2 = 32'h40050050;
+0: rp2040_rom2 = 32'h4a084b07;
+1: rp2040_rom2 = 32'h2104601a;
+2: rp2040_rom2 = 32'h4b0762d1;
+3: rp2040_rom2 = 32'h60182001;
+4: rp2040_rom2 = 32'h18400341;
+5: rp2040_rom2 = 32'hd1012801;
+6: rp2040_rom2 = 32'h18404249;
+7: rp2040_rom2 = 32'he7f860d8;
+8: rp2040_rom2 = 32'h4000f000;
+9: rp2040_rom2 = 32'h400140a0;
+10: rp2040_rom2 = 32'h40050050;
             default:    
                 rp2040_rom2 = 0;
         endcase
