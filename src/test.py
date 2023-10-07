@@ -268,22 +268,22 @@ async def test_rom(dut):
 
     data = await do_read(dut, 0, 256)
     
-    expected_words = [0x21004b07, 0x21066099, 0x49066159, 0x49066019, 0x60014806, 0x60592100, 0x60992101, 0x47084904, 0x18000000, 0x005f0300, 0x6b001218, 0x180000f4, 0x10000201]
+    expected_words = [0x21624b08, 0x4b086199, 0x609a2200, 0x60194907, 0x33f44907, 0x3bf46019, 0x2101605a, 0x49056099, 0x00004708, 0x40020000, 0x18000000, 0x005f0300, 0x6b001218, 0x10000201]
     expected_data = []
     for word in expected_words:
         expected_data.append(word & 0xff)
         expected_data.append((word >> 8) & 0xff)
         expected_data.append((word >> 16) & 0xff)
         expected_data.append((word >> 24) & 0xff)
-    expected_data.extend([0 for _ in range(256-52-4)])
-    expected_data.append(0x2c)
-    expected_data.append(0x24)
-    expected_data.append(0xa3)
-    expected_data.append(0xb2)
+    expected_data.extend([0 for _ in range(256-56-4)])
+    expected_data.append(0x8f)
+    expected_data.append(0x1b)
+    expected_data.append(0x41)
+    expected_data.append(0x32)
 
     assert len(expected_data) == 256
-    assert expected_data[51] == 0x10
-    assert expected_data[255] == 0xb2
+    assert expected_data[55] == 0x10
+    assert expected_data[255] == 0x32
 
     for i in range(256):
         assert data[i] == expected_data[i]

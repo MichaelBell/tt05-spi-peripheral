@@ -130,21 +130,22 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FA
     // And starts execution at 0x10000200 (address 0x200 in flash)
     function [31:0] rp2040_rom(input [5:0] addr);
         case(addr)
-0: rp2040_rom = 32'h21004b07;
-1: rp2040_rom = 32'h21066099;
-2: rp2040_rom = 32'h49066159;
-3: rp2040_rom = 32'h49066019;
-4: rp2040_rom = 32'h60014806;
-5: rp2040_rom = 32'h60592100;
-6: rp2040_rom = 32'h60992101;
-7: rp2040_rom = 32'h47084904;
-8: rp2040_rom = 32'h18000000;
-9: rp2040_rom = 32'h005f0300;
-10: rp2040_rom = 32'h6b001218;
-11: rp2040_rom = 32'h180000f4;
-12: rp2040_rom = 32'h10000201;
+0: rp2040_rom = 32'h21624b08;
+1: rp2040_rom = 32'h4b086199;
+2: rp2040_rom = 32'h609a2200;
+3: rp2040_rom = 32'h60194907;
+4: rp2040_rom = 32'h33f44907;
+5: rp2040_rom = 32'h3bf46019;
+6: rp2040_rom = 32'h2101605a;
+7: rp2040_rom = 32'h49056099;
+8: rp2040_rom = 32'h00004708;
+9: rp2040_rom = 32'h40020000;
+10: rp2040_rom = 32'h18000000;
+11: rp2040_rom = 32'h005f0300;
+12: rp2040_rom = 32'h6b001218;
+13: rp2040_rom = 32'h10000201;
 
-            63: rp2040_rom = 32'hb2a3242c;
+            63: rp2040_rom = 32'h32411b8f;
             default:    
                 rp2040_rom = 0;
         endcase

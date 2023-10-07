@@ -9,6 +9,7 @@ TOPLEVEL_LANG ?= verilog
 ifneq ($(GATES),yes)
 
 # this is the only part you should need to modify:
+COMPILE_ARGS    += -DSIM
 VERILOG_SOURCES += $(PWD)/tb.v $(PWD)/top.v $(PWD)/spi_slave.v $(PWD)/decoder.v
 
 else

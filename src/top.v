@@ -22,11 +22,28 @@ module tt_um_MichaelBell_spi_slave (
     wire [7:0] debug_byte;
     wire [3:0] debug_nibble;
 
+    // CS is vulnerable to positive edge glitches.  Add some buffers to reduce the risk
+`ifdef SIM
+    wire cur_cs;
+    assign #2 cur_cs = ui_in[1] && rst_n;
+`else
+    localparam MAX_BUFFER = 3;
+    wire [MAX_BUFFER:0] buffer_cs_in;
+    wire [MAX_BUFFER:0] buffer_cs_out;
+    assign buffer_cs_in = {buffer_cs_out[MAX_BUFFER-1:0], ui_in[1] && rst_n};
+    sky130_fd_sc_hd__buf_1 buffers [MAX_BUFFER:0] (
+        .X(buffer_cs_out),
+        .A(buffer_cs_in)
+    );
+
+    wire cur_cs = ui_in[1] && &buffer_cs_out;
+`endif
+
     // SPI slave
     spi_slave i_spi(
             .spi_clk(clk), 
             .spi_d_in(uio_in[3:0]), 
-            .spi_select(ui_in[1] && rst_n), 
+            .spi_select(cur_cs),
             .spi_d_out(uio_out[3:0]),
             .spi_d_oe(spi_d_oe), 
             .debug_clk(ui_in[0]), 
