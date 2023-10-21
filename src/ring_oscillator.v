@@ -15,7 +15,9 @@
 
 /* Simple ring oscillator generating a fast clock */
 
+`ifdef SIM
 `timescale 100ps/1ps
+`endif
 
 module RingOscillator
     #(parameter NUM_FAST_CLKS = 3, parameter STAGES=11)

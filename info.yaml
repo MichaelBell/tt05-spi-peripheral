@@ -31,7 +31,7 @@ documentation:
 # Longer description of how the project works. You can use standard markdown format.
   how_it_works: |
       TODO.
-      Note the main clk is used for the SPI clock.
+      Note the project clk is a debug clock only, the project (and clock tree) are clocked off input 0.
 
 # Instructions on how someone could test your project, include things like what buttons do what and how to set the clock if needed
   how_to_test:  |
@@ -39,7 +39,7 @@ documentation:
 
 # A description of what the inputs do (e.g. red button, SPI CLK, SPI MOSI, etc).
   inputs:               
-    - Debug Clock?
+    - SPI CLK
     - SPI CSn
     - Debug nibble select
     - Debug addr 0

@@ -7,7 +7,7 @@ module tt_um_MichaelBell_spi_slave (
     output wire [7:0] uio_out,  // IOs: Bidirectional Output path
     output wire [7:0] uio_oe,   // IOs: Bidirectional Enable path (active high: 0=input, 1=output)
     input  wire       ena,      // will go high when the design is enabled
-    input  wire       clk,      // clock
+    input  wire       clk,      // clock (used as debug clock only)
     input  wire       rst_n     // reset_n - low to reset
 );
 
@@ -41,12 +41,12 @@ module tt_um_MichaelBell_spi_slave (
 
     // SPI slave
     spi_slave i_spi(
-            .spi_clk(clk), 
+            .spi_clk(ui_in[0]), 
             .spi_d_in(uio_in[3:0]), 
             .spi_select(cur_cs),
             .spi_d_out(uio_out[3:0]),
             .spi_d_oe(spi_d_oe), 
-            .debug_clk(ui_in[0]), 
+            .debug_clk(clk), 
             .addr_in(ui_in[5:3]), 
             .byte_out(debug_byte),
             .rosc_ena(ena));

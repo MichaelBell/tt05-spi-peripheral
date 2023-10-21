@@ -12,7 +12,7 @@
 
 # PL_TARGET_DENSITY - You can increase this if Global Placement fails with error GPL-0302.
 # Users have reported that values up to 0.8 worked well for them.
-set ::env(PL_TARGET_DENSITY) 0.75
+set ::env(PL_TARGET_DENSITY) 0.74
 
 # CLOCK_PERIOD - Increase this in case you are getting setup time violations.
 # The value is in nanoseconds, so 20ns == 50MHz.
@@ -25,6 +25,12 @@ set ::env(GLB_RESIZER_HOLD_SLACK_MARGIN) 0.05
 # RUN_LINTER, LINTER_INCLUDE_PDK_MODELS - Disabling the linter is not recommended!
 set ::env(RUN_LINTER) 1
 set ::env(LINTER_INCLUDE_PDK_MODELS) 1
+
+# The design is clocked from the SPI clock, so change the clock port to ui_in[0]
+# The TT clk is only used to latch debug info, it will be more convenient to
+# have them this way around to use the switches and button on the demo PCB to
+# inspect the data
+set ::env(CLOCK_PORT) {ui_in[0]}
 
 # Configuration docs: https://openlane.readthedocs.io/en/latest/reference/configuration.html
 
@@ -71,7 +77,6 @@ set ::env(DECAP_CELL) "\
 
 # Clock
 set ::env(RUN_CTS) 1
-set ::env(CLOCK_PORT) {clk}
 
 # Don't use power rings or met5 layer
 set ::env(DESIGN_IS_CORE) 0
