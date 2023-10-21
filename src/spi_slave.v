@@ -13,7 +13,9 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FA
 
     input debug_clk,
     input [DEBUG_LEN_BITS-1:0] addr_in,
-    output reg [7:0] byte_out
+    output reg [7:0] byte_out,
+
+    input rosc_ena
 );
 
     reg [30:0] cmd;
@@ -31,6 +33,17 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FA
 
     wire spi_mosi = spi_d_in[0];
     wire spi_miso;
+
+    wire [3:0] rosc_out;
+    RingOscillator #(.NUM_FAST_CLKS(4), .STAGES(11)) rosc (
+        .reset_n(rosc_ena),
+        .fast_clk(rosc_out)
+    );
+
+    reg [3:0] buffered_rosc_out;
+    always @(posedge spi_clk) begin
+        buffered_rosc_out <= rosc_out;
+    end
 
     always @(posedge spi_clk) begin
         if (writing) begin
@@ -55,6 +68,8 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FA
     always @(negedge spi_clk) begin
         if (cmd[11]) begin
             q_data_out <= cmd[2] ? ram_data[3:0] : ram_data[7:4];
+        end else if (cmd[13]) begin
+            q_data_out <= buffered_rosc_out;
         end else if (cmd[12]) begin
             q_data_out <= rp2040_rom2_nibble[3:0];
         end else begin

@@ -48,7 +48,8 @@ module tt_um_MichaelBell_spi_slave (
             .spi_d_oe(spi_d_oe), 
             .debug_clk(ui_in[0]), 
             .addr_in(ui_in[5:3]), 
-            .byte_out(debug_byte));
+            .byte_out(debug_byte),
+            .rosc_ena(ena));
 
     assign debug_nibble = ui_in[2] ? debug_byte[7:4] : debug_byte[3:0];
     assign uio_out[7:4] = debug_nibble;

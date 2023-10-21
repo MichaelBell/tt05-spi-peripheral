@@ -10,6 +10,14 @@ async def do_start(dut):
     clock = Clock(dut.debug_clk, 77, units="ns")
     cocotb.start_soon(clock.start())
 
+    dut.ena.value = 0
+    dut.spi_select.value = 0
+    dut.rst_n.value = 0
+    await Timer(20, "ns")
+
+    dut.ena.value = 1
+    await Timer(20, "ns")
+
     dut.spi_select.value = 1
     dut.rst_n.value = 1
     dut.clk.value = 0
@@ -285,3 +293,13 @@ async def test_rom(dut):
 
     for i in range(256):
         assert data[i] == expected_data[i]
+
+@cocotb.test()
+async def test_rosc(dut):
+    await do_start(dut)
+    data = await do_read(dut, 0x400, 16)
+
+    print(data)
+
+    assert data[0] != data[1]
+

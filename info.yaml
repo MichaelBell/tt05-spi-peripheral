@@ -9,6 +9,7 @@ project:
     - top.v
     - decoder.v
     - spi_slave.v
+    - ring_oscillator.v
   top_module:  "tt_um_MichaelBell_spi_slave"      # Put the name of your top module here, must start with "tt_um_". Make it unique by including your github username
 
 # How many tiles your design occupies? A single tile is about 167x108 uM.
