@@ -252,39 +252,36 @@ async def test_rom(dut):
     await do_start(dut)
     data = await do_read(dut, 0x200, 128)
 
-    expected_words = [0x4a084b07, 0x2104601a, 0x4b0762d1, 0x60182001, 0x18400341, 0xd1012801, 0x18404249, 0xe7f860d8, 0x4000f000, 0x400140a0, 0x40050050]
+    expected_words = [0x4a0c4b0b, 0x2104601a, 0x200562d1, 0x4d0a6250, 0x6668204a, 0x20014b09, 0x03416018, 0x28011840, 0x4249d101, 0x60d81840, 0x03a46a14, 0xe7f2d4f6, 0x4000f000, 0x400140a0, 0x4001c000, 0x40050050]
     expected_data = []
     for word in expected_words:
         expected_data.append(word & 0xff)
         expected_data.append((word >> 8) & 0xff)
         expected_data.append((word >> 16) & 0xff)
         expected_data.append((word >> 24) & 0xff)
-    expected_data.extend([0 for _ in range(128-44)])
+    expected_data.extend([0 for _ in range(128-16*4)])
     assert len(expected_data) == 128
-    assert expected_data[43] == 0x40
 
     for i in range(128):
         assert data[i] == expected_data[i]
 
     data = await do_read(dut, 0, 256)
     
-    expected_words = [0x21624b08, 0x4b086199, 0x609a2200, 0x60194907, 0x33f44907, 0x3bf46019, 0x2101605a, 0x49056099, 0x00004708, 0x40020000, 0x18000000, 0x005f0300, 0x6b001218, 0x10000201]
+    expected_words = [0x4a284b27, 0x2105601a, 0x64b94f27, 0x65b96539, 0x204a4d26, 0x66686628, 0x064a06be, 0x21006232, 0x03806cf8, 0x61f2d505, 0x3c010b74, 0x3101d1fd, 0x2318e7f6, 0x2200061b, 0x221f609a, 0x601a0412, 0x609a2201, 0x661d4d1a, 0x6c786619, 0xd5030380, 0x010921ab, 0xe0126619, 0x2a0e6a9a, 0x6e1ad1fc, 0x4a146e19, 0x6619661a, 0x2a0e6a9a, 0x6e1ad1fc, 0x4c116e19, 0x39016121, 0x661a1d2a, 0x6a9a6619, 0xd1fc2a0e, 0x609a2200, 0x6019490c, 0x33f4490c, 0x3bf46019, 0x2101605a, 0x490a6099, 0x00004708, 0x4000f000, 0x00804020, 0x40014074, 0x4001c000, 0x02000100, 0x03000104, 0x40060000, 0x005f0300, 0x6b001218, 0x10000201]
     expected_data = []
     for word in expected_words:
         expected_data.append(word & 0xff)
         expected_data.append((word >> 8) & 0xff)
         expected_data.append((word >> 16) & 0xff)
         expected_data.append((word >> 24) & 0xff)
-    expected_data.extend([0 for _ in range(256-56-4)])
-    expected_data.append(0x8f)
-    expected_data.append(0x1b)
-    expected_data.append(0x41)
-    expected_data.append(0x32)
+    expected_data.extend([0 for _ in range(256-50*4-4)])
+    checksum = 0xa5d88739
+    expected_data.append(checksum & 0xff)
+    expected_data.append((checksum >> 8) & 0xff)
+    expected_data.append((checksum >> 16) & 0xff)
+    expected_data.append((checksum >> 24) & 0xff)
 
     assert len(expected_data) == 256
-    assert expected_data[55] == 0x10
-    assert expected_data[255] == 0x32
 
     for i in range(256):
         assert data[i] == expected_data[i]
-
