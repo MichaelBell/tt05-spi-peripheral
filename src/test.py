@@ -230,6 +230,37 @@ async def test_mix(dut):
         assert recv == mem
 
 @cocotb.test()
+async def test_wrap(dut):
+    await do_start(dut)
+
+    await do_quad_write(dut, 0, [1, 0xff, 0xaa, 4, 0x80, 0x08, 0xa5, 0x5a])
+    mem = [1, 0xff, 0xaa, 4, 0x80, 0x08, 0xa5, 0x5a]
+
+    for i in range(100):
+        length = random.randint(1,16)
+        data = [random.randint(0,255) for _ in range(length)]
+        addr = random.randint(0, 255-length)
+        addr += random.randint(0, 1) * 0x200
+        if random.randint(0,1) == 0:
+            await do_quad_write(dut, 256+addr, data)
+        else:
+            await do_write(dut, 256+addr, data)
+        if random.randint(0,1) == 0:
+            recv = await do_quad_read(dut, 256+addr, length)
+        else:
+            recv = await do_read(dut, 256+addr, length)
+        if length > 8: assert recv[-8:] == data[-8:]
+        else: assert recv == data
+
+        for k in range(length):
+            mem[(addr + k) & 7] = data[k]
+        if random.randint(0,1) == 0:
+            recv = await do_quad_read(dut, 256, 8)
+        else:
+            recv = await do_read(dut, 256, 8)
+        assert recv == mem
+
+@cocotb.test()
 async def test_debug(dut):
     await do_start(dut)
     await do_write(dut, 0, [1, 2, 3, 4, 5, 6, 7, 8])
