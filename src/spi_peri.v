@@ -4,7 +4,7 @@
 // QSPI fast read has 2 delays cycles (or more, configurable by parameter).
 // QSPI reads and writes use MOSI only for command and address, D0-D3 are used for data only.
 
-module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FAST_READ_DELAY = 2 ) (
+module spi_peri #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FAST_READ_DELAY = 2 ) (
     input spi_clk,
     input [3:0] spi_d_in,
     input spi_select,
@@ -137,8 +137,9 @@ module spi_slave #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FA
         end
     end
 
-    always @(posedge debug_clk) begin
-        byte_out <= data[addr_in];
+    always @(debug_clk or data[addr_in]) begin
+        if (debug_clk)
+            byte_out <= data[addr_in];
     end
 
     // This ROM at memory address 0 launches the RP2040 into XIP mode (QSPI)

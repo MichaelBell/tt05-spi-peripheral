@@ -8,9 +8,9 @@ project:
   source_files:        
     - top.v
     - decoder.v
-    - spi_slave.v
+    - spi_peri.v
     - ring_oscillator.v
-  top_module:  "tt_um_MichaelBell_spi_slave"      # Put the name of your top module here, must start with "tt_um_". Make it unique by including your github username
+  top_module:  "tt_um_MichaelBell_spi_peri"      # Put the name of your top module here, must start with "tt_um_". Make it unique by including your github username
 
 # How many tiles your design occupies? A single tile is about 167x108 uM.
   tiles: "1x1"    # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2 or 8x2
@@ -24,9 +24,9 @@ yaml_version: 4
 # Here is a great example: https://github.com/davidsiaw/tt02-davidsiaw-stackcalc/blob/38c5647f83aad2aec675d566aa3d67b98f0aac81/info.yaml
 documentation: 
   author:       "Mike Bell"      # Your name
-  title:        "SPI Slave"      # Project title
+  title:        "SPI Peripheral"      # Project title
   language:     "Verilog" # other examples include Verilog, Amaranth, VHDL, etc
-  description:  "SPI Slave Memory"      # Short description of what your project does
+  description:  "SPI RAM/ROM/Random source"      # Short description of what your project does
 
 # Longer description of how the project works. You can use standard markdown format.
   how_it_works: |
@@ -69,8 +69,8 @@ documentation:
     - Debug bit 3
 
 # The following fields are optional
-  tag:          "spi, memory"      # comma separated list of tags: test, encryption, experiment, clock, animation, utility, industrial, pwm, fpga, alu, microprocessor, risc, riscv, sensor, signal generator, fft, filter, music, bcd, sound, serial, timer, random number generator, calculator, decoder, counter, puzzle, multiplier, game, oscillator,
-  external_hw:  ""      # Describe any external hardware needed
+  tag:          "spi, memory, qspi, rom, random"      # comma separated list of tags: test, encryption, experiment, clock, animation, utility, industrial, pwm, fpga, alu, microprocessor, risc, riscv, sensor, signal generator, fft, filter, music, bcd, sound, serial, timer, random number generator, calculator, decoder, counter, puzzle, multiplier, game, oscillator,
+  external_hw:  "TODO"      # Describe any external hardware needed
   discord:      "rebelmike"      # Your discord handle, used for communication and automatically assigning tapeout role after a submission
   doc_link:     ""      # URL to longer form documentation, eg the README.md in your repository
   clock_hz:     10000000       # Clock frequency in Hz (if required)

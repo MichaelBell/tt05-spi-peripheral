@@ -1,5 +1,14 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg)
 
+# SPI Peripheral
+
+This project implements a (Q)SPI device that implements:
+- 8 bytes of RAM
+- A ring oscillator that works as a simple random source
+- A ROM to plug into an RP2040
+
+More details to follow.
+
 # What is Tiny Tapeout?
 
 TinyTapeout is an educational project that aims to make it easier and cheaper than ever to get your digital designs manufactured on a real chip.

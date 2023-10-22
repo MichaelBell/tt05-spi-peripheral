@@ -40,7 +40,7 @@ module tb ();
 
     wire [7:0] uio_oe;
 
-    tt_um_MichaelBell_spi_slave i_tt (
+    tt_um_MichaelBell_spi_peri i_tt (
     // include power ports for the Gate Level test
     `ifdef GL_TEST
         .VPWR( 1'b1),

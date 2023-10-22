@@ -1,6 +1,6 @@
 `default_nettype none
 
-module tt_um_MichaelBell_spi_slave (
+module tt_um_MichaelBell_spi_peri (
     input  wire [7:0] ui_in,    // Dedicated inputs - connected to the input switches
     output wire [7:0] uo_out,   // Dedicated outputs - connected to the 7 segment display
     input  wire [7:0] uio_in,   // IOs: Bidirectional Input path
@@ -39,8 +39,8 @@ module tt_um_MichaelBell_spi_slave (
     wire cur_cs = ui_in[1] && &buffer_cs_out;
 `endif
 
-    // SPI slave
-    spi_slave i_spi(
+    // SPI peripheral
+    spi_peri i_spi(
             .spi_clk(ui_in[0]), 
             .spi_d_in(uio_in[3:0]), 
             .spi_select(cur_cs),

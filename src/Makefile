@@ -10,7 +10,7 @@ ifneq ($(GATES),yes)
 
 # this is the only part you should need to modify:
 COMPILE_ARGS    += -DSIM
-VERILOG_SOURCES += $(PWD)/tb.v $(PWD)/top.v $(PWD)/spi_slave.v $(PWD)/decoder.v $(PWD)/ring_oscillator.v
+VERILOG_SOURCES += $(PWD)/tb.v $(PWD)/top.v $(PWD)/spi_peri.v $(PWD)/decoder.v $(PWD)/ring_oscillator.v
 
 else
 
