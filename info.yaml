@@ -52,7 +52,7 @@ documentation:
 
       The values in the RAM may be inspected by setting the address on the input toggle switches 2-5 and pressing the single clock button to latch the data, which is displayed on the 7 segment display and presented on uio pins 4-7.  The default project clock should otherwise not be used - the project is clocked from the SPI clock.
 
-      The project is also designed to be used as a ROM connected to an RP2040's QSPI pins (instead of the more normal flash).  You'll need a custom board for this as the QSPI pins are generall connected directly to a flash chip, I have a couple which I could potentially send to interested people in the UK - contact me on Discord.
+      The project is also designed to be used as a ROM connected to an RP2040's QSPI pins (instead of the more normal flash).  You'll need a custom board for this as the QSPI pins are generally connected directly to a flash chip, I have a couple which I could potentially send to interested people in the UK - contact me on Discord.
 
 # A description of what the inputs do (e.g. red button, SPI CLK, SPI MOSI, etc).
   inputs:               
