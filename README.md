@@ -43,7 +43,7 @@ If write commands are used on other parts of the address space they will instead
 
 ## Random source
 
-A ring oscillator provides (probably) random data in the address range 0x400-0x4FF.  This is very simple and the values may be predictable or even repeating if you happen to choose a related clock rate for the SPI access - don't use it for anything important!  Note the address read makes no difference to the data.  Both SPI and QSPI reads are supported (all the bits in a QSPI read are generated from differently divided clocks).
+A ring oscillator provides (probably) random data in the address range 0x400-0x4FF.  This is very simple and the values may be predictable or even repeating if you happen to choose a related clock rate for the SPI access - don't use it for anything important!  Note the address selected makes no difference to the data.  Both SPI and QSPI reads are supported (all the bits in a QSPI read are generated from differently divided clocks).
 
 # Usage with RP2040
 
@@ -65,6 +65,7 @@ Additionally, to test the full functionality you should have the following conne
 | RP2040 pin | Usage |
 | ---------- | ----- |
 | RUN        | Reset button (short to ground to reset) |
+| GPIO 25    | LED |
 | GPIO 24    | Button (short to ground when pressed) |
 | GPIO 23    | Button or toggle switch (short to ground or open) |
 | GPIO 20    | UART TX (unknown baud rate - use a logic analyser) |
