@@ -33,7 +33,7 @@ The following commands are supported:
 | 0x6B    | QSPI Read, 2 cycles delay between command and data |
 
 When not in use, the 4 data lines are high-Z (inputs).  For SPI read, MISO is switched to an output one cycle before output starts.
-For QSPI read all data lines are switched to outputs on the first delay cycle.  The controller should set MOSI to high-Z before the first clock edge after the last bit of the address. (TODO: Should this be on the second delay cycle instead?)
+For QSPI read all data lines are switched to outputs on the second delay cycle.  The controller should set MOSI to high-Z before the second clock edge after the last bit of the address.
 
 ## RAM
 

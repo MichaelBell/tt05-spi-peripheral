@@ -125,10 +125,8 @@ module spi_peri #( parameter RAM_LEN_BITS = 3, parameter DEBUG_LEN_BITS = 3, FAS
                     end
                 end
             end else if (delay) begin
-                if (next_start_count == FAST_READ_DELAY - 1) begin
-                    spi_d_oe <= 4'b1111;
-                end
                 if (next_start_count == FAST_READ_DELAY) begin
+                    spi_d_oe <= 4'b1111;
                     delay <= 0;
                 end
             end else if (reading || writing) begin

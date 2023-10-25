@@ -110,7 +110,7 @@ async def do_quad_read(dut, addr, length):
         await cycle_clock(dut)
     assert dut.uio_oe.value == 0b11110000
     await cycle_clock(dut)
-    assert dut.uio_oe.value == 0b11111111
+    assert dut.uio_oe.value == 0b11110000
     await cycle_clock(dut)
     for j in range(length):
         d = 0
