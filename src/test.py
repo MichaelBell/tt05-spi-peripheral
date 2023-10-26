@@ -32,11 +32,14 @@ async def do_start(dut):
     dut.spi_mosi.value = 0
     await Timer(20, "ns")
 
+    #dut.debug_clk.value = 1
+    #dut.debug_addr.value = 0
+
 async def cycle_clock(dut, num=1):
     await Timer(4, "ns")
-    dut.clk.value = 1
-    await Timer(8, "ns")
     dut.clk.value = 0
+    await Timer(8, "ns")
+    dut.clk.value = 1
     await Timer(5, "ns")
 
 async def do_write(dut, addr, data):
